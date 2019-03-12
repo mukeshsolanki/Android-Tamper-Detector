@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.Build
 import android.text.TextUtils
+import android.util.Log
 import java.io.ByteArrayInputStream
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -20,13 +21,17 @@ import javax.security.auth.x500.X500Principal
 /**
  * Created by mukeshsolanki on 12/03/19.
  */
-class Detector(private val context: Context, private val listener: OnTamperDetectionListener) {
+class Detector private constructor(
+  private val context: Context,
+  private val listener: OnTamperDetectionListener,
+  private val debugMode: Boolean,
+  private val runOnEmulator: Boolean,
+  private val sha1Key: String,
+  private val packageName: String
+) {
 
   private val DEBUG_DN = X500Principal("CN=Android Debug,O=Android,C=US")
-  private var debugMode = false
-  private var runOnEmulator = false
   private val allowDebugKeystore = false
-  private var sha1Key: String = ""
 
   fun getInstaller(): String? {
     return context.packageManager.getInstallerPackageName(context.packageName)
@@ -42,16 +47,8 @@ class Detector(private val context: Context, private val listener: OnTamperDetec
     return debugMode
   }
 
-  fun allowDebugMode(state: Boolean) {
-    debugMode = state
-  }
-
   fun isRunOnEmulatorEnabled(): Boolean {
     return this.runOnEmulator
-  }
-
-  fun shouldRunOnEmulator(state: Boolean) {
-    runOnEmulator = state
   }
 
   fun isRunningOnEmulator(): Boolean {
@@ -67,13 +64,9 @@ class Detector(private val context: Context, private val listener: OnTamperDetec
         || buildDetails.contains("test-keys"))
   }
 
-  fun releaseSHA1FingerPrint(fingerPrint: String) {
-    this.sha1Key = fingerPrint
-  }
-
   fun check() {
     if (TextUtils.isEmpty(sha1Key)) {
-      throw IllegalArgumentException("Please call releaseSHA1FingerPrint(fingerPrint: String) before checking")
+      throw IllegalArgumentException("Please call sha1FingerPrint(fingerPrint: String) before checking")
     }
     if (isDebugBuild() && !isDebugModeEnabled()) {
       listener.onAppTampered("The app is running in DEBUG mode")
@@ -87,15 +80,19 @@ class Detector(private val context: Context, private val listener: OnTamperDetec
       listener.onAppTampered("The certificate is invalid")
       return
     }
+    if (packageName != context.packageName) {
+      listener.onAppTampered("The package name is invalid")
+      return
+    }
     listener.onAppOkay()
   }
 
-  fun isCertificateSHA1FingerPrintValid(sha1Key: String): Boolean {
+  private fun isCertificateSHA1FingerPrintValid(sha1Key: String): Boolean {
     return getCertificateSHA1FingerPrint().equals(sha1Key, true)
   }
 
   @SuppressLint("PackageManagerGetSignatures")
-  fun getCertificateSHA1FingerPrint(): String? {
+  private fun getCertificateSHA1FingerPrint(): String? {
     val pm = context.packageManager
     val packageName = context.packageName
     val flags = if (Build.VERSION.SDK_INT >= 28) {
@@ -187,5 +184,44 @@ class Detector(private val context: Context, private val listener: OnTamperDetec
       if (i < arr.size - 1) str.append(':')
     }
     return str.toString()
+  }
+
+  data class Builder(
+    private var context: Context? = null,
+    private var listener: OnTamperDetectionListener? = null,
+    private var allowDebugMode: Boolean = false,
+    private var allowEmulators: Boolean = false,
+    private var sha1FingerPrint: String? = null,
+    private var packageName: String? = null
+  ) {
+    fun with(context: Context) = apply { this.context = context }
+    fun listener(listener: OnTamperDetectionListener) = apply { this.listener = listener }
+    fun enableDebugMode(allowDebugMode: Boolean) = apply { this.allowDebugMode = allowDebugMode }
+    fun allowEmulators(allowEmulators: Boolean) = apply { this.allowEmulators = allowEmulators }
+    fun sha1FingerPrint(sha1FingerPrint: String) = apply { this.sha1FingerPrint = sha1FingerPrint }
+    fun packageName(packageName: String) = apply { this.packageName = packageName }
+
+    fun build(): Detector {
+      if (context == null) {
+        throw IllegalArgumentException("Context cannot be empty please use with(context: Context)")
+      }
+      if (listener == null) {
+        throw IllegalArgumentException("Listener cannot be empty please use listener(listener: OnTamperDetectionListener)")
+      }
+      if (TextUtils.isEmpty(sha1FingerPrint)) {
+        throw IllegalArgumentException("SHA1FingerPrint cannot be empty please use sha1FingerPrint(sha1FingerPrint: String)")
+      }
+      if (TextUtils.isEmpty(packageName)) {
+        throw IllegalArgumentException("PackageName cannot be empty please use packageName(packageName: String)")
+      }
+      return Detector(
+        context!!,
+        listener!!,
+        allowDebugMode,
+        allowEmulators,
+        sha1FingerPrint!!,
+        packageName!!
+      )
+    }
   }
 }

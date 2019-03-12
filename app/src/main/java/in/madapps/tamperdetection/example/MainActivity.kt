@@ -1,33 +1,34 @@
-package `in`.madapps.tamperdetection
+package `in`.madapps.tamperdetection.example
 
+import `in`.madapps.tamperdetection.Detector.Builder
+import `in`.madapps.tamperdetection.OnTamperDetectionListener
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.checkAppButton
 import kotlinx.android.synthetic.main.activity_main.debugToggle
 import kotlinx.android.synthetic.main.activity_main.emulatorToggle
-import kotlinx.android.synthetic.main.activity_main.installSource
-import kotlinx.android.synthetic.main.activity_main.shaKey
 
 class MainActivity : AppCompatActivity(), OnTamperDetectionListener {
-  var detector: Detector? = null
+  var detector: Builder? = null
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
-    detector = Detector(this@MainActivity, this@MainActivity)
-    detector?.releaseSHA1FingerPrint("YourKey")
-    installSource.text = detector?.getInstaller()
-    shaKey.text = detector?.getCertificateSHA1FingerPrint()
+    detector =
+      Builder().packageName("your actual package name").listener(this@MainActivity)
+        .with(this@MainActivity)
+        .sha1FingerPrint("release sha 1 finger print")
+//    installSource.text = detector?.getInstaller()
     setListeners()
   }
 
   private fun setListeners() {
-    checkAppButton.setOnClickListener { detector?.check() }
+    checkAppButton.setOnClickListener { detector?.build()?.check() }
     debugToggle.setOnCheckedChangeListener { _, isChecked ->
-      detector?.allowDebugMode(isChecked)
+      detector?.enableDebugMode(isChecked)
     }
     emulatorToggle.setOnCheckedChangeListener { _, isChecked ->
-      detector?.shouldRunOnEmulator(isChecked)
+      detector?.allowEmulators(isChecked)
     }
   }
 
