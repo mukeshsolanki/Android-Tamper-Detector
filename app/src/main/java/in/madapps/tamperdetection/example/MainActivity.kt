@@ -1,6 +1,6 @@
 package `in`.madapps.tamperdetection.example
 
-import `in`.madapps.tamperdetection.Detector.Builder
+import `in`.madapps.tamperdetection.Detector
 import `in`.madapps.tamperdetection.OnTamperDetectionListener
 import android.os.Bundle
 import android.util.Log
@@ -10,12 +10,12 @@ import kotlinx.android.synthetic.main.activity_main.debugToggle
 import kotlinx.android.synthetic.main.activity_main.emulatorToggle
 
 class MainActivity : AppCompatActivity(), OnTamperDetectionListener {
-  var detector: Builder? = null
+  var detector: Detector.Builder? = null
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
     detector =
-      Builder().packageName("your actual package name").listener(this@MainActivity)
+      Detector.Builder().packageName("your actual package name").listener(this@MainActivity)
         .with(this@MainActivity)
         .sha1FingerPrint("release sha 1 finger print")
     setListeners()
