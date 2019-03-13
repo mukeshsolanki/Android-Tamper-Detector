@@ -10,9 +10,6 @@ import android.os.Build
 import android.text.TextUtils
 import java.io.ByteArrayInputStream
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
-import java.security.cert.CertificateEncodingException
-import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import javax.security.auth.x500.X500Principal
@@ -92,83 +89,64 @@ class Detector private constructor(
 
   @SuppressLint("PackageManagerGetSignatures")
   private fun getCertificateSHA1FingerPrint(): String? {
-    val pm = context.packageManager
-    val packageName = context.packageName
-    val flags = if (Build.VERSION.SDK_INT >= 28) {
-      PackageManager.GET_SIGNING_CERTIFICATES
-    } else {
-      PackageManager.GET_SIGNATURES
-    }
-    var packageInfo: PackageInfo? = null
+    val packageManager = context.packageManager
+    val flags = getFlags()
+    val packageInfo: PackageInfo? = getPackageInfo(packageManager, flags)
+    val signatures = getSignatures(packageInfo)
+    val cert = signatures[0].toByteArray()
+    val inputStream = ByteArrayInputStream(cert)
+    val certificateFactory: CertificateFactory
+    val certificate: X509Certificate
+    var hexString: String? = null
     try {
-      packageInfo = pm.getPackageInfo(packageName, flags)
-    } catch (e: PackageManager.NameNotFoundException) {
+      certificateFactory = CertificateFactory.getInstance("X509")
+      certificate = certificateFactory.generateCertificate(inputStream) as X509Certificate
+      val md = MessageDigest.getInstance("SHA1")
+      val publicKey = md.digest(certificate.encoded)
+      hexString = byte2HexFormatted(publicKey)
+    } catch (e: Exception) {
       e.printStackTrace()
     }
+    return hexString
+  }
 
-    val signatures = if (Build.VERSION.SDK_INT >= 28) {
+  private fun getSignatures(packageInfo: PackageInfo?): Array<Signature> =
+    if (Build.VERSION.SDK_INT >= 28) {
       packageInfo!!.signingInfo!!.apkContentsSigners
     } else {
       packageInfo!!.signatures
     }
-    val cert = signatures[0].toByteArray()
-    val input = ByteArrayInputStream(cert)
-    var cf: CertificateFactory? = null
-    try {
-      cf = CertificateFactory.getInstance("X509")
-    } catch (e: CertificateException) {
-      e.printStackTrace()
-    }
 
-    var c: X509Certificate? = null
-    try {
-      c = cf!!.generateCertificate(input) as X509Certificate
-    } catch (e: CertificateException) {
-      e.printStackTrace()
-    }
+  private fun getPackageInfo(packageManager: PackageManager, flags: Int): PackageInfo? = try {
+    packageManager.getPackageInfo(context.packageName, flags)
+  } catch (e: PackageManager.NameNotFoundException) {
+    e.printStackTrace()
+    null
+  }
 
-    var hexString: String? = null
-    try {
-      val md = MessageDigest.getInstance("SHA1")
-      val publicKey = md.digest(c!!.encoded)
-      hexString = byte2HexFormatted(publicKey)
-    } catch (e1: NoSuchAlgorithmException) {
-      e1.printStackTrace()
-    } catch (e: CertificateEncodingException) {
-      e.printStackTrace()
-    }
-
-    return hexString
+  private fun getFlags(): Int = if (Build.VERSION.SDK_INT >= 28) {
+    PackageManager.GET_SIGNING_CERTIFICATES
+  } else {
+    PackageManager.GET_SIGNATURES
   }
 
   @SuppressLint("PackageManagerGetSignatures")
   private fun isSignedWithDebugKeystore(): Boolean {
     var debuggable = false
-
     try {
-      val pInfo: PackageInfo
-      val signatures: Array<Signature>
-      if (Build.VERSION.SDK_INT >= 28) {
-        pInfo = context.packageManager
-          .getPackageInfo(context.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
-        signatures = pInfo.signingInfo.apkContentsSigners
-      } else {
-        pInfo = context.packageManager
-          .getPackageInfo(context.packageName, PackageManager.GET_SIGNATURES)
-        signatures = pInfo.signatures
-      }
-      val cf = CertificateFactory.getInstance("X.509")
-      for (i in signatures.indices) {
-        val stream = ByteArrayInputStream(signatures[i].toByteArray())
-        val cert = cf.generateCertificate(stream) as X509Certificate
+      val packageInfo: PackageInfo? = getPackageInfo(context.packageManager, getFlags())
+      val signatures: Array<Signature> = getSignatures(packageInfo)
+      val certificateFactory = CertificateFactory.getInstance("X.509")
+      for (index in signatures.indices) {
+        val stream = ByteArrayInputStream(signatures[index].toByteArray())
+        val cert = certificateFactory.generateCertificate(stream) as X509Certificate
         debuggable = cert.subjectX500Principal == DEBUG_DN
         if (debuggable)
           break
       }
-    } catch (e: PackageManager.NameNotFoundException) {
-    } catch (e: CertificateException) {
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
-
     return debuggable
   }
 
