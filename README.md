@@ -63,7 +63,7 @@ Okay seems like you integrated the library in your project but **how do you use 
 You simple create a Detector object using the builder and set the details and call the `check()` and that should be it you will receive a call back with the details in the OnTamperDetectionListener.
 
 To enable debug for development you can do `detector.enableDebugMode(true)` and `detector.allowEmulators(true)`
-That's pretty much it and your all wrapped up. You have successfully connected the Places Api to the AutoCompleteTextView.
+That's pretty much it and your all wrapped up.
 
 ## Author
 Maintained by [Mukesh Solanki](https://www.github.com/mukeshsolanki)
