@@ -18,7 +18,6 @@ class MainActivity : AppCompatActivity(), OnTamperDetectionListener {
       Builder().packageName("your actual package name").listener(this@MainActivity)
         .with(this@MainActivity)
         .sha1FingerPrint("release sha 1 finger print")
-//    installSource.text = detector?.getInstaller()
     setListeners()
   }
 

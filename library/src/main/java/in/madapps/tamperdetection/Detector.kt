@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.Build
 import android.text.TextUtils
-import android.util.Log
 import java.io.ByteArrayInputStream
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
