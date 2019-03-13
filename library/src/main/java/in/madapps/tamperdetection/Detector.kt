@@ -29,24 +29,39 @@ class Detector private constructor(
   private val DEBUG_DN = X500Principal("CN=Android Debug,O=Android,C=US")
   private val allowDebugKeystore = false
 
+  /**
+   * Gets the source from where the app was installed. Will return null in case of developer mode or debug mode.
+   */
   fun getInstaller(): String? {
     return context.packageManager.getInstallerPackageName(context.packageName)
   }
 
+  /**
+   * Returns true if the app is running in debug mode
+   */
   fun isDebugBuild(): Boolean {
     return (BuildConfig.DEBUG
         || isSignedWithDebugKeystore()
         || 0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE || !allowDebugKeystore && isSignedWithDebugKeystore())
   }
 
+  /**
+   * Returns true if debug mode is enabled
+   */
   fun isDebugModeEnabled(): Boolean {
     return debugMode
   }
 
+  /**
+   * Returns true if the app is allowed to run on emulators
+   */
   fun isRunOnEmulatorEnabled(): Boolean {
     return this.runOnEmulator
   }
 
+  /**
+   * Returns true if the app is running on an emulator
+   */
   fun isRunningOnEmulator(): Boolean {
     val buildDetails =
       (Build.FINGERPRINT + Build.DEVICE + Build.MODEL + Build.BRAND + Build.PRODUCT + Build.MANUFACTURER + Build.HARDWARE).toLowerCase()
@@ -60,6 +75,9 @@ class Detector private constructor(
         || buildDetails.contains("test-keys"))
   }
 
+  /**
+   * Check if the apk has been tampered with. It compares the release packagename, SHA1 FingerPrint, debugBuild, and checks if its running on emulators
+   */
   fun check() {
     if (TextUtils.isEmpty(sha1Key)) {
       throw IllegalArgumentException("Please call sha1FingerPrint(fingerPrint: String) before checking")
@@ -96,13 +114,13 @@ class Detector private constructor(
     val cert = signatures[0].toByteArray()
     val inputStream = ByteArrayInputStream(cert)
     val certificateFactory: CertificateFactory
-    val certificate: X509Certificate
+    val certificate: X509Certificate?
     var hexString: String? = null
     try {
       certificateFactory = CertificateFactory.getInstance("X509")
-      certificate = certificateFactory.generateCertificate(inputStream) as X509Certificate
+      certificate = certificateFactory.generateCertificate(inputStream) as? X509Certificate
       val md = MessageDigest.getInstance("SHA1")
-      val publicKey = md.digest(certificate.encoded)
+      val publicKey = md.digest(certificate?.encoded)
       hexString = byte2HexFormatted(publicKey)
     } catch (e: Exception) {
       e.printStackTrace()
@@ -139,8 +157,8 @@ class Detector private constructor(
       val certificateFactory = CertificateFactory.getInstance("X.509")
       for (index in signatures.indices) {
         val stream = ByteArrayInputStream(signatures[index].toByteArray())
-        val cert = certificateFactory.generateCertificate(stream) as X509Certificate
-        debuggable = cert.subjectX500Principal == DEBUG_DN
+        val cert = certificateFactory.generateCertificate(stream) as? X509Certificate
+        debuggable = cert?.subjectX500Principal == DEBUG_DN
         if (debuggable)
           break
       }
@@ -163,6 +181,9 @@ class Detector private constructor(
     return str.toString()
   }
 
+  /**
+   * Builder to create a Detector object with all the proper configuration
+   */
   data class Builder(
     private var context: Context? = null,
     private var listener: OnTamperDetectionListener? = null,
@@ -171,33 +192,51 @@ class Detector private constructor(
     private var sha1FingerPrint: String? = null,
     private var packageName: String? = null
   ) {
+    /**
+     * Sets the context required by the detector to read the package information
+     */
     fun with(context: Context) = apply { this.context = context }
+
+    /**
+     * The lister used to pass the information back to the user from the detector
+     */
     fun listener(listener: OnTamperDetectionListener) = apply { this.listener = listener }
+
+    /**
+     * Enabled or disables debug mode so the user can easily use the library during development
+     */
     fun enableDebugMode(allowDebugMode: Boolean) = apply { this.allowDebugMode = allowDebugMode }
+
+    /**
+     * Enables or disables the app from running on emulators
+     */
     fun allowEmulators(allowEmulators: Boolean) = apply { this.allowEmulators = allowEmulators }
+
+    /**
+     * Sets the SHA1 FingerPrint for validation
+     */
     fun sha1FingerPrint(sha1FingerPrint: String) = apply { this.sha1FingerPrint = sha1FingerPrint }
+
+    /**
+     * Sets the packageName for validation
+     */
     fun packageName(packageName: String) = apply { this.packageName = packageName }
 
+    /**
+     * Creates the Detector object to be used by the user
+     */
     fun build(): Detector {
-      if (context == null) {
-        throw IllegalArgumentException("Context cannot be empty please use with(context: Context)")
-      }
-      if (listener == null) {
-        throw IllegalArgumentException("Listener cannot be empty please use listener(listener: OnTamperDetectionListener)")
-      }
-      if (TextUtils.isEmpty(sha1FingerPrint)) {
-        throw IllegalArgumentException("SHA1FingerPrint cannot be empty please use sha1FingerPrint(sha1FingerPrint: String)")
-      }
-      if (TextUtils.isEmpty(packageName)) {
-        throw IllegalArgumentException("PackageName cannot be empty please use packageName(packageName: String)")
-      }
       return Detector(
-        context!!,
-        listener!!,
+        context
+          ?: throw NullPointerException("Context cannot be empty please use with(context: Context)"),
+        listener
+          ?: throw NullPointerException("Listener cannot be empty please use listener(listener: OnTamperDetectionListener)"),
         allowDebugMode,
         allowEmulators,
-        sha1FingerPrint!!,
-        packageName!!
+        sha1FingerPrint
+          ?: throw NullPointerException("SHA1FingerPrint cannot be empty please use sha1FingerPrint(sha1FingerPrint: String)"),
+        packageName
+          ?: throw NullPointerException("PackageName cannot be empty please use packageName(packageName: String)")
       )
     }
   }
