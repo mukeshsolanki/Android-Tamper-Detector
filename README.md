@@ -4,7 +4,7 @@
   <a href="https://www.codacy.com/app/mukeshsolanki/Android-Tamper-Detector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mukeshsolanki/Android-Tamper-Detector&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/c86e3c0ade6849ff9b10b3b06591a75c"/></a>
   <a href="https://jitpack.io/#mukeshsolanki/Android-Tamper-Detector"> <img src="https://jitpack.io/v/mukeshsolanki/Android-Tamper-Detector/month.svg" /></a>
   <a href="https://jitpack.io/#mukeshsolanki/Android-Tamper-Detector"> <img src="https://jitpack.io/v/mukeshsolanki/Android-Tamper-Detector.svg" /></a>
-  <a href="https://circleci.com/gh/mukeshsolanki/Android-Tamper-Detector/tree/master"> <img src="https://circleci.com/gh/mukeshsolanki/Android-Tamper-Detector/tree/master.svg?style=shield" /></a>
+  <a href="https://github.com/mukeshsolanki/Android-Tamper-Detector/actions"> <img src="https://github.com/mukeshsolanki/Android-Tamper-Detector/workflows/Build/badge.svg" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg"/></a>
   <br /><br />
     A simple library that can help you detect if you app is modded or tampered with. This adds a security level that makes it difficult to crack your app.
