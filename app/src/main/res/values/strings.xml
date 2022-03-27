@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Android Tamper Detector</string>
+    <string name="installer_check">Check Installer</string>
+    <string name="installer_check_success">Installed from Store</string>
+    <string name="installer_check_error">Illegal Install</string>
+    <string name="signature_check">Check Signature</string>
+    <string name="signature_check_error">App is modded</string>
+    <string name="signature_check_success">App is not modded</string>
+    <string name="debugger_check">Check Debugger Attached</string>
+    <string name="debugger_check_success">Debugger is not Attached</string>
+    <string name="debugger_check_error">Debugger is Attached</string>
 </resources>
