@@ -1,7 +1,5 @@
 <h1 align="center">Android Tamper Detector</h1>
 <p align="center">
-  <a href="https://codeclimate.com/github/mukeshsolanki/Android-Tamper-Detector/maintainability"><img src="https://api.codeclimate.com/v1/badges/cbcf70f1f6dd85432504/maintainability" /></a>
-  <a href="https://www.codacy.com/app/mukeshsolanki/Android-Tamper-Detector?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mukeshsolanki/Android-Tamper-Detector&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/c86e3c0ade6849ff9b10b3b06591a75c"/></a>
   <a href="https://jitpack.io/#mukeshsolanki/Android-Tamper-Detector"> <img src="https://jitpack.io/v/mukeshsolanki/Android-Tamper-Detector/month.svg" /></a>
   <a href="https://jitpack.io/#mukeshsolanki/Android-Tamper-Detector"> <img src="https://jitpack.io/v/mukeshsolanki/Android-Tamper-Detector.svg" /></a>
   <a href="https://github.com/mukeshsolanki/Android-Tamper-Detector/actions"> <img src="https://github.com/mukeshsolanki/Android-Tamper-Detector/workflows/Build/badge.svg" /></a>

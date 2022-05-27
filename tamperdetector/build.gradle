@@ -10,7 +10,7 @@ android {
     publishNonDefault true
     defaultPublishConfig 'release'
     defaultConfig {
-        minSdk 23
+        minSdk 21
         targetSdk 32
         consumerProguardFiles "consumer-rules.pro"
     }
