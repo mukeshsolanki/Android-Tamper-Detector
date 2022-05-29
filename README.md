@@ -59,7 +59,7 @@ this.verifyInstaller(Installer.GOOGLE_PLAY_STORE)?.let {
 ```
 
 3. Verify Signature
-To verify whether your app has been modified or not you can use `validateSignature()`. You can get your release signature from [here](#how-to-get-release-signature?)
+To verify whether your app has been modified or not you can use `validateSignature()`. You can get your release signature from [here](#how-to-get-release-signature)
 ```kotlin
 if (this.validateSignature("INSERT YOUR RELEASE SIGNATURE HERE") == Result.VALID) {
     // Signature is valid continue using the app
