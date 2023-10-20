@@ -1,8 +1,6 @@
 <h1 align="center">Android Tamper Detector</h1>
 <p align="center">
-  <a href="https://jitpack.io/#mukeshsolanki/Android-Tamper-Detector"> <img src="https://jitpack.io/v/mukeshsolanki/Android-Tamper-Detector/month.svg" /></a>
   <a href="https://jitpack.io/#mukeshsolanki/Android-Tamper-Detector"> <img src="https://jitpack.io/v/mukeshsolanki/Android-Tamper-Detector.svg" /></a>
-  <a href="https://github.com/mukeshsolanki/Android-Tamper-Detector/actions"> <img src="https://github.com/mukeshsolanki/Android-Tamper-Detector/workflows/Build/badge.svg" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg"/></a>
   <br /><br />
     A simple library that can help you detect if you app is modded or tampered with or debugger tools are being used to break your app and checks install source.
@@ -29,8 +27,8 @@ allprojects {
 Step 2. Add the dependency
 ```groovy
 dependencies {
-        debugImplementation 'com.github.mukeshsolanki.Android-Tamper-Detector:tamperdetector-no-op:1.0.0'
-        releaseImplementation 'com.github.mukeshsolanki.Android-Tamper-Detector:tamperdetector:1.0.0'
+        debugImplementation 'com.github.mukeshsolanki.Android-Tamper-Detector:tamperdetector-no-op:1.0.1'
+        releaseImplementation 'com.github.mukeshsolanki.Android-Tamper-Detector:tamperdetector:1.0.1'
 }
 ```
 
